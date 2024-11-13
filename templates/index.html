@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UDP/TCP Server Selection</title>
+    <style>
+        /* Global Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        h2 {
+            color: #1BA94C;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #status {
+            color: #6E6BFE;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        /* Button Styles */
+        button {
+            background-color: #1BA94C;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #148F3E;
+        }
+
+        button:active {
+            background-color: #117E35;
+        }
+
+        /* Input Field Styles */
+        #messageInput {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        /* Messages Section */
+        #messages {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+            height: 150px;
+            overflow-y: scroll;
+            margin-bottom: 10px;
+        }
+
+        #messages p {
+            margin: 5px 0;
+            padding: 5px;
+            background-color: #e0f7fa;
+            border-radius: 5px;
+        }
+
+        /* Media Queries */
+        body:after {
+            content: '';
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            display: block;
+            background: #1BA94C;
+            border-radius: 50%;
+            box-shadow: 0 0 1000px 350px #1BA94C;
+            left: 0;
+            top: 100%;
+            transform: translate(80%, -80%);
+            opacity: 0.3;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        body:before {
+            content: '';
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            display: block;
+            background: #6E6BFE;
+            border-radius: 50%;
+            box-shadow: 0 0 1000px 350px #6E6BFE;
+            right: 0;
+            top: 100%;
+            transform: translate(-80%, -80%);
+            opacity: 0.3;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        h2 {
+            font-size: 24px;
+        }
+
+        button {
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        #messageInput {
+            width: 100%;
+        }
+
+        #messages {
+            height: 200px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Select Connection Type</h2>
+    <button onclick="startServer('udp')">Start UDP Server</button>
+    <button onclick="startServer('tcp')">Start TCP Server</button>
+
+    <div id="status"></div>
+
+    <h2>Messages</h2>
+    <div id="messages"></div>
+    <input id="messageInput" type="text" placeholder="Enter message...">
+    <button onclick="sendMessage()">Send</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+    <script>
+        var socket = io();
+
+        // Function to send request to start server
+        function startServer(protocol) {
+            fetch(`/${protocol}_server`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('status').innerText = `Server started with ${protocol.toUpperCase()} protocol`;
+                })
+                .catch(error => console.error('Error starting server:', error));
+        }
+
+        // Listen for messages from the server
+        socket.on('message', function (data) {
+            var message = data.msg;
+            var messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML += '<p>' + message + '</p>';
+        });
+
+        // Send message to the server
+        function sendMessage() {
+            var input = document.getElementById('messageInput');
+            var message = input.value;
+            socket.send({ 'msg': message });
+            input.value = '';
+        }
+    </script>
+</body>
+
+</html>
